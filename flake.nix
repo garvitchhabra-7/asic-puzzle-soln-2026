@@ -24,6 +24,7 @@
 
           # Synthesis and netlist analysis
           yosys
+          xdot
 
           # Simulation
           iverilog
@@ -31,7 +32,6 @@
 
           # Waveform viewing
           gtkwave
-          surfer
 
           # LVS / netlist comparison
           netgen-vlsi
@@ -44,6 +44,11 @@
         ];
 
         shellHook = ''
+          # yosys/xdot/ciel drag in python3.14 site-packages via PYTHONPATH,
+          # which breaks our python3.13 env (numpy ABI mismatch). Strip them.
+          export PYTHONPATH="$(echo "$PYTHONPATH" | tr ':' '\n' | grep -v 'python3\.14' | tr '\n' ':' | sed 's/:$//')"
+          export PATH="${python}/bin:''${PATH}"
+
           export SKY130_HD="$PWD/libs/sky130_fd_sc_hd"
           export PDK_ROOT="$HOME/.ciel"
           export PDK=sky130A
