@@ -22,6 +22,8 @@ This provisions the following toolchain:
 
 The shell also configures environment variables for the SkyWater SKY130 PDK. If the PDK isn't installed yet, follow the on-screen instructions to fetch it with `ciel`.
 
+> **Want to skip ahead?** If you just want to run the full pipeline without walking through each step, see [Makefile](#makefile) at the bottom.
+
 ## Step 2: Extract a SPICE Netlist from the GDS
 
 Use Magic to extract a SPICE netlist from the puzzle layout:
@@ -113,3 +115,24 @@ cd tests && make MODULE=test_success
 ```
 
 This reads the 121-bit solution from `outputs/solution.txt` (written by Step 5) and feeds it into the puzzle, logging the output bytes and `success` flag for 15 cycles.
+
+## Makefile
+
+Steps 2–6 are wrapped in a top-level `Makefile` with dependency tracking. After entering the Nix shell (Step 1), you can run the entire pipeline with:
+
+```bash
+make          # runs: extract → netlist → solve → verify
+```
+
+Or run individual steps:
+
+```bash
+make extract  # Step 2: GDS → SPICE netlist
+make netlist  # Step 3: SPICE → Verilog
+make test     # Step 4: cocotb simulation tests
+make solve    # Step 5: Yosys SAT solver
+make verify   # Step 6: verify the solution
+make clean    # remove all generated outputs
+```
+
+Each target tracks file dependencies, so `make solve` will automatically run `extract` and `netlist` first if their outputs don't exist yet. If an output already exists and its inputs haven't changed, Make skips the step. To force a re-run, use `make -B <target>`.
