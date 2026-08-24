@@ -77,7 +77,7 @@ cd tests && make
 ```
 
 The test suite (`test_puzzle.py`) includes three cases:
-- **test_120_zeros** — feeds 120 zero bits, expects output `EMPTY SKY`
+- **test_121_zeros** — feeds 121 zero bits, expects output `EMPTY SKY`
 - **test_vcd_run0** — replays the first input sequence from `example_inputs.vcd`, expects `TRY AGAIN`
 - **test_vcd_run1** — replays the second input sequence from `example_inputs.vcd`, expects `TRY AGAIN`
 
@@ -87,34 +87,24 @@ The SKY130 library's functional Verilog uses Verilog UDP primitives for sequenti
 
 ## Step 5: Solve with Yosys SAT
 
-Generate a Yosys script and run it to find the 120-bit input that makes `success=1`:
+Run the SAT solver to find the 121-bit input that makes `success=1`:
 
 ```bash
-python scripts/gen_solve_ys.py
-yosys scripts/solve.ys 2>&1 | tee logs/yosys_solve.log
+bash scripts/run_sat_solve.sh
 ```
 
-The generator (`gen_solve_ys.py`) supports a `--validate` flag that feeds all-zero input and asserts the first output byte is `'E'` (0x45), useful for verifying the setup before a full solve.
+This wrapper script generates the Yosys SAT script, runs the solver (with live output), and extracts the solution — all in one command. The log is saved to `logs/yosys_solve.log` and the solution is written to `outputs/solution.txt`.
 
-The generated script uses `clk2fflogic` to convert flip-flops into combinational edge-detection logic, then runs `sat -seq` over 270 SAT steps (2 per clock cycle — one for clk=0 setup, one for the clk=1 posedge).
-
-## Step 6: Extract the Solution
-
-Extract the 120-bit solution from the Yosys SAT log:
+You can also pass flags through to the generator:
 
 ```bash
-python scripts/extract_solution.py logs/yosys_solve.log
+bash scripts/run_sat_solve.sh --validate   # all-zero input, assert first byte = 'E'
+bash scripts/run_sat_solve.sh --sim         # all-zero input, no assertions (skip extraction)
 ```
 
-Or pipe directly during the solve:
+The generated script uses `clk2fflogic` to convert flip-flops into combinational edge-detection logic, then runs `sat -seq` over 270 SAT steps (2 per clock cycle — one for clk=0 setup, one for the clk=1 posedge). The input phase covers 121 bits: bit 0 is always 0, bits 1-120 are free in solve mode.
 
-```bash
-yosys scripts/solve.ys 2>&1 | tee logs/yosys_solve.log | python scripts/extract_solution.py /dev/stdin
-```
-
-This parses the SAT output for the `I` signal values at each input clock cycle, prints the 120-bit solution string, and writes it to `outputs/solution.txt`.
-
-## Step 7: Verify the Solution
+## Step 6: Verify the Solution
 
 Run the solution through cocotb to confirm the output and `success` signal:
 
@@ -122,4 +112,4 @@ Run the solution through cocotb to confirm the output and `success` signal:
 cd tests && make MODULE=test_success
 ```
 
-This reads the solution bits from `outputs/solution.txt` (written by Step 6) and feeds them into the puzzle, logging the output bytes and `success` flag for 15 cycles.
+This reads the 121-bit solution from `outputs/solution.txt` (written by Step 5) and feeds it into the puzzle, logging the output bytes and `success` flag for 15 cycles.

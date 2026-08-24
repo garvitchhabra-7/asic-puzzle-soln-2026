@@ -19,7 +19,7 @@ def read_output_byte(dut):
 
 @cocotb.test()
 async def test_success(dut):
-    """Send solution bits, then read output for 15 cycles."""
+    """Send 121-bit solution, then read output for 15 cycles."""
     bits = load_solution()
     clock = Clock(dut.clk, 10, unit="ns")
     cocotb.start_soon(clock.start())
@@ -31,7 +31,6 @@ async def test_success(dut):
     dut.rst_n.value = 1
     await RisingEdge(dut.clk)
     dut.enable.value = 1
-    await RisingEdge(dut.clk)
 
     for b in bits:
         dut.I.value = int(b)

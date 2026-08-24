@@ -2,8 +2,8 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, ClockCycles
 
-VCD_RUN0 = "001010100000001011000010100110000000001000000111011000010010110000111001100000001011000000101110000000001000001100111000"
-VCD_RUN1 = "110101100001001111000000000100000100001100001110111000010000110000100101100000010111000011001110000000001000000000010000"
+VCD_RUN0 = "0001010100000001011000010100110000000001000000111011000010010110000111001100000001011000000101110000000001000001100111000"
+VCD_RUN1 = "1110101100001001111000000000100000100001100001110111000010000110000100101100000010111000011001110000000001000000000010000"
 
 def read_output_byte(dut):
     byte = 0
@@ -14,7 +14,7 @@ def read_output_byte(dut):
     return byte
 
 async def run_input_bits(dut, bits, label, num_output_cycles=9):
-    """Reset, feed input bits, read output."""
+    """Reset, feed 121 input bits, read output."""
     clock = Clock(dut.clk, 10, unit="ns")
     cocotb.start_soon(clock.start())
 
@@ -25,7 +25,6 @@ async def run_input_bits(dut, bits, label, num_output_cycles=9):
     dut.rst_n.value = 1
     await RisingEdge(dut.clk)
     dut.enable.value = 1
-    await RisingEdge(dut.clk)
 
     for b in bits:
         dut.I.value = int(b)
@@ -50,9 +49,9 @@ async def run_input_bits(dut, bits, label, num_output_cycles=9):
     return result
 
 @cocotb.test()
-async def test_120_zeros(dut):
-    """Send 120 zero bits, then read output for 9 cycles."""
-    result = await run_input_bits(dut, "0" * 120, "zeros")
+async def test_121_zeros(dut):
+    """Send 121 zero bits, then read output for 9 cycles."""
+    result = await run_input_bits(dut, "0" * 121, "zeros")
     assert result == "EMPTY SKY", f"Expected 'EMPTY SKY', got '{result}'"
 
 @cocotb.test()

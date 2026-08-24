@@ -5,7 +5,7 @@ Usage:
     python3 scripts/gen_solve_ys.py [--validate | --sim]
 
 Modes:
-    solve (default): free 120 input bits, assert success=1
+    solve (default): free 121 input bits (bit 0 = 0), assert success=1
     --validate:      all-zero input, assert first output byte = 'E' (0x45)
     --sim:           all-zero input, no output assertions (just show outputs)
 
@@ -48,8 +48,8 @@ for ct in sorted(cell_types - skip_cells):
 # Real clock cycles (matching cocotb test):
 #   cycle 1-3:     reset (rst_n=0, enable=0, I=0)
 #   cycle 4:       release reset (rst_n=1, enable=0, I=0)
-#   cycle 5:       enable activation (rst_n=1, enable=1, I=0)
-#   cycle 6-125:   120 input bits (rst_n=1, enable=1, I=free/zero)
+#   cycle 5-125:   121 input bits (rst_n=1, enable=1, I=free/zero)
+#                  bit 0 (cycle 5) is always 0
 #   cycle 126:     wait cycle (rst_n=1, enable=0, I=0)
 #   cycle 127-135: output phase (rst_n=1, enable=0, I=0)
 #
@@ -108,10 +108,8 @@ for c in range(1, 4):
 # Release reset: cycle 4
 set_cycle(sat_parts, 4, rst_n=1, enable=0, I=0)
 
-# Enable activation: cycle 5 (always I=0)
+# Input phase: cycles 5-125 (121 bits, bit 0 at cycle 5 is always 0)
 set_cycle(sat_parts, 5, rst_n=1, enable=1, I=0)
-
-# Input phase: cycles 6-125 (120 bits)
 for c in range(6, 126):
     if validate_mode or sim_mode:
         set_cycle(sat_parts, c, rst_n=1, enable=1, I=0)
