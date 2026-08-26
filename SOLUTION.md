@@ -1,5 +1,21 @@
 # Solution Procedure
 
+## Pipeline Overview
+
+```
+nix develop          Enter the Nix dev shell
+     │
+make setup           Fetch submodule + PDK (one-time)
+     │
+make extract         GDS → SPICE netlist  (Magic)                ┐
+     │                                                           │
+make netlist         SPICE → Verilog      (spice_to_verilog.py)  ├─ make all
+     │                                                           │
+make solve           SAT solve            (Yosys)                │
+     │                                                           │
+make verify          Confirm solution     (cocotb)               ┘
+```
+
 ## Prerequisites
 
 This project uses a Nix flake to manage its toolchain. You need **Nix** installed with **flakes enabled**. If you don't have Nix yet, look up how to install Nix and enable the `nix-command` and `flakes` experimental features.

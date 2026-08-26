@@ -53,15 +53,9 @@
           export PDK_ROOT="$PWD/.ciel"
           export PDK=sky130A
 
-          if [ ! -d "$SKY130_HD/cells" ]; then
-            echo "WARNING: sky130_fd_sc_hd submodule not initialized."
-            echo "Run: git submodule update --init"
-          fi
-
-          if [ ! -e "$PDK_ROOT/$PDK" ]; then
-            echo "WARNING: sky130A PDK not installed."
-            echo "Run: ciel fetch --pdk sky130A <version> && ciel enable --pdk sky130A <version>"
-            echo "Use: ciel ls-remote --pdk sky130A  to list available versions"
+          if [ ! -d "$SKY130_HD/cells" ] || [ ! -e "$PDK_ROOT/$PDK" ]; then
+            echo "WARNING: Environment not fully set up."
+            echo "Run: make setup"
           fi
         '';
       };
