@@ -1,5 +1,18 @@
 # Solution Procedure
 
+## Prerequisites
+
+This project uses a Nix flake to manage its toolchain. You need **Nix** installed with **flakes enabled**. If you don't have Nix yet, look up how to install Nix and enable the `nix-command` and `flakes` experimental features.
+
+After cloning the repository, enter the Nix shell and run `make setup` to initialize the submodule and fetch the PDK:
+
+```bash
+nix develop
+make setup
+```
+
+This pulls the `sky130_fd_sc_hd` standard cell library into `libs/` (so you can browse the Verilog cell definitions locally) and fetches the full SKY130 PDK into `.ciel/` via ciel.
+
 ## Step 1: Set Up the Dev Environment
 
 Enter the Nix development shell to get all the required tools:
@@ -20,7 +33,7 @@ This provisions the following toolchain:
 | PDK management | pdk-ciel |
 | Python (3.13) | gdstk, pyvcd, numpy, cocotb |
 
-The shell also configures environment variables for the SkyWater SKY130 PDK. If the PDK isn't installed yet, follow the on-screen instructions to fetch it with `ciel`.
+The shell also configures environment variables for the SkyWater SKY130 PDK. If you haven't run `make setup` yet (see [Prerequisites](#prerequisites)), do that first — it fetches the PDK into `.ciel/` inside the project directory so everything can be cleaned up by deleting the repo.
 
 > **Want to skip ahead?** If you just want to run the full pipeline without walking through each step, see [Makefile](#makefile) at the bottom.
 
@@ -35,7 +48,7 @@ bash scripts/run_extract.sh puzzle.gds puzzle
 - `puzzle.gds` — the GDS file to extract
 - `puzzle` — the name of the top-level cell
 
-**Why ciel is required:** Magic needs a process technology file (`sky130A.tech`) to understand the GDS layer stack and perform extraction. This file is not included in the `sky130_fd_sc_hd` cell library — it is only available through the full SKY130 PDK, which is built by `open_pdks`. Ciel (formerly volare) is a version manager that downloads pre-built PDK releases, avoiding the need to build `open_pdks` from source. The extraction script uses the tech file from `~/.ciel/sky130A/libs.tech/magic/`.
+**Why ciel is required:** Magic needs a process technology file (`sky130A.tech`) to understand the GDS layer stack and perform extraction. This file is not included in the `sky130_fd_sc_hd` cell library — it is only available through the full SKY130 PDK, which is built by `open_pdks`. Ciel (formerly volare) is a version manager that downloads pre-built PDK releases, avoiding the need to build `open_pdks` from source. The extraction script uses the tech file from `.ciel/sky130A/libs.tech/magic/`.
 
 The following warnings are known and do not impact the output:
 
@@ -127,6 +140,7 @@ make          # runs: extract → netlist → solve → verify
 Or run individual steps:
 
 ```bash
+make setup    # fetch submodule + PDK (one-time)
 make extract  # Step 2: GDS → SPICE netlist
 make netlist  # Step 3: SPICE → Verilog
 make test     # Step 4: cocotb simulation tests

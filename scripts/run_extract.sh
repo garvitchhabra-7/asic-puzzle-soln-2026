@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: run_extract.sh <filename> <cellname>
 # where <filename> is a GDS layout file and <cellname> is the top-level cell to extract.
-echo ${PDK_ROOT:=~/.ciel} > /dev/null
+echo ${PDK_ROOT:=.ciel} > /dev/null
 echo ${PDK:=sky130A} > /dev/null
 mkdir -p outputs logs
 export PDKPATH=${PDK_ROOT}/${PDK}

@@ -50,7 +50,7 @@
           export PATH="${python}/bin:''${PATH}"
 
           export SKY130_HD="$PWD/libs/sky130_fd_sc_hd"
-          export PDK_ROOT="$HOME/.ciel"
+          export PDK_ROOT="$PWD/.ciel"
           export PDK=sky130A
 
           if [ ! -d "$SKY130_HD/cells" ]; then

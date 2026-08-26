@@ -7,3 +7,5 @@ scripts/solve.ys
 __pycache__/
 *.pyc
 extfiles/
+.ciel/
+.claude/
