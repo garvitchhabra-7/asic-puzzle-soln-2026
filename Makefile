@@ -15,27 +15,27 @@ setup: check_nix
 all: check_nix solve verify
 
 # Step 2: Extract SPICE netlist from GDS using Magic
-outputs/puzzle.spice: check_nix puzzle.gds scripts/run_extract.sh
+outputs/puzzle.spice: puzzle.gds scripts/run_extract.sh
 	bash scripts/run_extract.sh puzzle.gds puzzle
 	@test -s $@ || (echo "Error: extraction produced no output"; exit 1)
 
-extract: outputs/puzzle.spice
+extract: check_nix outputs/puzzle.spice
 
 # Step 3: Convert SPICE netlist to gate-level Verilog
-outputs/puzzle_netlist.v: check_nix outputs/puzzle.spice scripts/spice_to_verilog.py
+outputs/puzzle_netlist.v: outputs/puzzle.spice scripts/spice_to_verilog.py
 	python scripts/spice_to_verilog.py
 
-netlist: outputs/puzzle_netlist.v
+netlist: check_nix outputs/puzzle_netlist.v
 
 # Step 4: Run cocotb simulation tests
 test: check_nix outputs/puzzle_netlist.v
 	$(MAKE) -C tests MODULE=test_puzzle
 
 # Step 5: Solve with Yosys SAT
-outputs/solution.txt: check_nix outputs/puzzle_netlist.v scripts/run_sat_solve.sh scripts/gen_solve_ys.py scripts/extract_solution.py
+outputs/solution.txt: outputs/puzzle_netlist.v scripts/run_sat_solve.sh scripts/gen_solve_ys.py scripts/extract_solution.py
 	bash scripts/run_sat_solve.sh
 
-solve: outputs/solution.txt
+solve: check_nix outputs/solution.txt
 
 # Step 6: Verify the solution through cocotb
 verify: check_nix outputs/solution.txt outputs/puzzle_netlist.v
